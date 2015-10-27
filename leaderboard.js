@@ -4,20 +4,36 @@ if(Meteor.isClient){
   console.log("Hello client");
   Template.leaderboard.helpers({
     'player': function(){
-      return PlayerList.find();
+      return PlayerList.find({}, {sort: {score: -1, name: 1} })
     },
-    'otherHelperFunction': function() {
-      return "other helper funtion";
+    'selectedClass': function(){
+      var playerId = this._id;
+      var selectedPlayer = Session.get('selectedPlayer');
+      if(playerId == selectedPlayer){
+        return "selected";
+      }
+    },
+    'showSelectedPlayer': function(){
+      var selectedPlayer = Session.get('selectedPlayer');
+      return PlayerList.findOne(selectedPlayer)
     }
   });
 
   Template.leaderboard.events({
     'click .player': function(){
-      Session.set('selectedPlayer', 'session value test');
-      var selectedPlayer = Session.get('selectedPLayer');
-      console.log(selectedPlayer);
+      var playerID = this._id;
+      Session.set('selectedPlayer', playerID);
+    },
+    'click .increment': function(){
+      var selectedPlayer = Session.get('selectedPlayer');
+      PlayerList.update(selectedPlayer, {$inc: {score: 5} });
+    },
+    'click .decrement': function(){
+      var selectedPlayer = Session.get('selectedPlayer');
+      PlayerList.update(selectedPlayer, {$inc: {score: -5} });
     }
   });
+
 }
 
 if(Meteor.isServer){
